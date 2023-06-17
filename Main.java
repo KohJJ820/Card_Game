@@ -233,7 +233,7 @@ for (Player player : players) {
             while (true){
                 String gameChoice = input.nextLine();
                 if (gameChoice.equals("exit")) {
-                    System.out.println("game exited");
+                    System.out.println("Game exited");
                     break gameloop;
                 } else if (gameChoice.equals("load")) {
                     while (true) {
