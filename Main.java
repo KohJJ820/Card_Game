@@ -7,8 +7,8 @@ import java.util.HashMap;
 import java.io.*;
 import java.util.HashSet;
 
+//just Test
 class Main {
-
     public static void saveGame(ArrayList<Player> players, ArrayList<Player> playerAccordance, Deck deck,
         CenterDeck center, int k, int i, Map<Card, Player> cardPlayer, Scanner input) throws IOException {
         SaveData save = new SaveData(players, playerAccordance, deck, center, k, i, cardPlayer);
