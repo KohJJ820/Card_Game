@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.io.*;
 import java.util.HashSet;
 
-//just Test
 class Main {
     public static void saveGame(ArrayList<Player> players, ArrayList<Player> playerAccordance, Deck deck,
         CenterDeck center, int k, int i, Map<Card, Player> cardPlayer, Scanner input) throws IOException {
@@ -18,7 +17,6 @@ class Main {
         ObjectOutputStream out = new ObjectOutputStream(fileOut);
         out.writeObject(save);
         out.close();
-
     }
 
     public static SaveData loadGame(Scanner input) throws ClassNotFoundException, IOException {
@@ -50,13 +48,6 @@ class Main {
         center.sort(); // sort ascending (refer Card.java compareTo for info)
         Card largestRankCard = center.drawCardTop(); // take the last element of stack (greatest rank)
         Player highestRankPlayer = map.get(largestRankCard);
-        // for illustration purpose, print out the key-value pair if the Card:Player
-
-        // for (Card key : cardPlayer.keySet()) {
-        // System.out.println(key + " = " + cardPlayer.get(key));
-        // } // for checking purpose
-
-        // prints the winner
         return highestRankPlayer;
     }
 
@@ -311,20 +302,6 @@ for (Player player : players) {
                         loadStatus = false;
                     }
                     Player currentPlayer = playersAccordance.get(i);
-
-                    // for (Player player : players) {
-                    //     if (player.equals(currentPlayer)) {
-                    //         System.out.println("--> " + player.toString());
-                    //     } else {
-                    //         System.out.println("    " + player.toString());
-                    //     }
-
-                    // } // print player's deck
-
-                    // System.out.println(center);
-                    // System.out.println(deck.toString()); // print deckk
-                    // printScore(players);
-                    // System.out.println("Turn: Player" + currentPlayer.getPlayerNo());
                     printInfo(players, currentPlayer, k, loadStatus, savedData, center, deck);
                     Card cardToRemove = null;
                     boolean error = false;
@@ -348,7 +325,6 @@ for (Player player : players) {
                                     System.out.println();
                                     pause(input);
                                     continue playerloop;
-
                                 }
 
                                 System.out.println("You don't have a playable card. Please draw a card ^^");
@@ -370,7 +346,6 @@ for (Player player : players) {
                                 error = true;
                             }
                             printInfo(players, currentPlayer, k, loadStatus, savedData, center, deck);
-
                         } else if (choice.equals("s")) {
                             System.out.print("Would you like to start a new game?(y/n) :");
                             String startNew = input.nextLine();
@@ -418,7 +393,6 @@ for (Player player : players) {
                                 System.out.println("Failed to save");
                                 error = true;
                             }
-
                         } else if (choice.equals("load")) {
                             while (true) {
                                 try {
@@ -441,7 +415,6 @@ for (Player player : players) {
                                     error = true;
                                 }
                             }
-
                         } else {
                             try {
                                 cardToRemove = currentPlayer.removeCard(choice); // Card to remove
@@ -467,10 +440,8 @@ for (Player player : players) {
                                         System.out.println("Please match your suit or rank of the lead card ^^");
                                     }
                                 }
-
                             }
                         }
-
                     } while (error || choice.equals("d") || choice.equals("load") || choice.equals("save")); // end of
                                                                                                              // input
                                                                                                              // loop
