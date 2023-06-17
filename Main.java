@@ -199,6 +199,7 @@ class Main {
     }
 
     public static void printInfo(ArrayList<Player> players,Player currentPlayer, int k, boolean loadStatus, SaveData savedData, CenterDeck center, Deck deck) {
+        System.out.println();
         System.out.println("Trick" + k + "#");
 for (Player player : players) {
                         if (player.equals(currentPlayer)) {
@@ -219,16 +220,22 @@ for (Player player : players) {
         gameloop: while (true) { // New game
             SaveData savedData = new SaveData();
             Scanner input = new Scanner(System.in);
-            System.out.println("Start, load, exit: (s/l/e): ");
+            //Print homepage (start, load and exit)
+            System.out.println("*************************");
+            System.out.println("         GO BOOM         ");
+            System.out.println("*************************");
+            System.out.println(" START     LOAD     EXIT ");
+            System.out.println();
+            System.out.print("Enter your choice: ");
             boolean loadStatus = false;
             //while loop for gameChoice
             gameChoice:
             while (true){
                 String gameChoice = input.nextLine();
-                if (gameChoice.equals("e")) {
+                if (gameChoice.equals("exit")) {
                     System.out.println("game exited");
-                    break;
-                } else if (gameChoice.equals("l")) {
+                    break gameloop;
+                } else if (gameChoice.equals("load")) {
                     while (true) {
                         try {
                             savedData = loadGame(input);
@@ -240,7 +247,8 @@ for (Player player : players) {
                         }
                     }
                     
-                } else if (gameChoice.equals("s")) {
+                } else if (gameChoice.equals("start")) {
+                    System.out.println();
                     break;
                 } else {
                     System.out.println("Invalid input, please try again");
@@ -293,8 +301,6 @@ for (Player player : players) {
                     playersAccordance = savedData.getPlayerAccordance();
                     deck = savedData.getDeck();
                 }
-                System.out.println();
-
 
                 playerloop: for (int i = 0; i < 4; i++) {
                     if (loadStatus == true) {
@@ -445,7 +451,6 @@ for (Player player : players) {
                     } while (error || choice.equals("d") || choice.equals("load") || choice.equals("save")); // end of
                                                                                                              // input
                                                                                                              // loop
-
                     if (currentPlayer.getSize() == 0) { // end the round
                         countScore(players);
                         System.out.println("This is the final score for this round. Well Done ^^");
