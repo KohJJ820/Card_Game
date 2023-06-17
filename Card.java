@@ -1,7 +1,8 @@
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
-public class Card implements Comparable<Card>{
+public class Card implements Comparable<Card>,Serializable{
     private String suit;
     private String rank;
 

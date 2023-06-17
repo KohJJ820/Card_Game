@@ -1,8 +1,9 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Player {
+public class Player implements Serializable{
     private String playerNo;
-    private int score;
+    private int score = 0;
     private ArrayList<Card> handDeck;
 
     Player(String n){
@@ -49,5 +50,14 @@ public class Player {
     public int getSize(){
         return handDeck.size();
     }
+
+    public ArrayList<Card> getHandDeck(){
+        return handDeck;
+    }
+    
+    public void setScore(int score) {
+        this.score = score;
+    }
+
 
 }

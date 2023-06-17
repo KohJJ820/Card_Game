@@ -1,34 +1,54 @@
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Stack;
+import java.util.Arrays;
 import java.util.Scanner;
+import java.util.Stack;
 import java.util.Map;
 import java.util.HashMap;
+import java.io.*;
+import java.util.HashSet;
 
 class Main {
 
-    public static String printScore(ArrayList<Player> players) {
-        StringBuilder sb = new StringBuilder("Score: ");
-        for (Player player : players) {
-            sb.append("Player" + player.getPlayerNo() + " = " + player.getScore() + " | ");
-        }
-        sb.delete(sb.length() - 3, sb.length());
-        return sb.toString();
+    public static void saveGame(ArrayList<Player> players, ArrayList<Player> playerAccordance, Deck deck,
+        CenterDeck center, int k, int i, Map<Card, Player> cardPlayer, Scanner input) throws IOException {
+        SaveData save = new SaveData(players, playerAccordance, deck, center, k, i, cardPlayer);
+        System.out.print("Enter the filename to save: ");
+        String file = input.nextLine();
+        FileOutputStream fileOut = new FileOutputStream(file + ".txt");
+        ObjectOutputStream out = new ObjectOutputStream(fileOut);
+        out.writeObject(save);
+        out.close();
+
     }
 
-    public static void removeDiffSuit(Stack<Card> center) {
-        for (int j = 1; j < center.size(); j++) {
+    public static SaveData loadGame(Scanner input) throws ClassNotFoundException, IOException {
+        System.out.print("Enter the file name to load: ");
+        String file = input.nextLine();
+        FileInputStream fileIn = new FileInputStream(file + ".txt");
+        ObjectInputStream in = new ObjectInputStream(fileIn);
+        SaveData savedData = (SaveData) in.readObject();
+        return savedData;
+
+    }
+
+    public static boolean pause(Scanner scanner) {
+        System.out.println("Press anything to continue...");
+        scanner = new Scanner(System.in);
+        scanner.nextLine();
+        return true;
+    }
+
+    public static void removeDiffSuit(CenterDeck center) {
+        for (int j = 1; j < center.getSize(); j++) {
             if (center.get(j).getSuit() != center.get(0).getSuit()) {
                 center.remove(center.get(j));
             }
         }
     }
-    
-    
 
-    public static Player determineWinner(Stack<Card> center, Map<Card, Player> map) {
-        Collections.sort(center); // sort ascending (refer Card.java compareTo for info)
-        Card largestRankCard = center.pop(); // take the last element of stack (greatest rank)
+    public static Player determineWinner(CenterDeck center, Map<Card, Player> map) {
+        center.sort(); // sort ascending (refer Card.java compareTo for info)
+        Card largestRankCard = center.drawCardTop(); // take the last element of stack (greatest rank)
         Player highestRankPlayer = map.get(largestRankCard);
         // for illustration purpose, print out the key-value pair if the Card:Player
 
@@ -40,64 +60,62 @@ class Main {
         return highestRankPlayer;
     }
 
-    public static void determinePlayerAccordance(Card card, Stack<Card> center, ArrayList<Player> pA,
+    public static void determinePlayerAccordance(Card card, CenterDeck center, ArrayList<Player> pA,
             ArrayList<Player> players) {
-        switch (center.get(0).getRank()) {
-            case "A":
-            case "5":
-            case "9":
-            case "K":
-                for (int i = 0; i < players.size(); i++) {// Player1
-                    pA.add(players.get(i));
-                }
-                break;
-            case "2":
-            case "6":
-            case "X":// Player2
-                for (int i = 1; i < players.size(); i++) {
-                    pA.add(players.get(i));
-                    if (i == 0) {
-                        break;
-                    }
-                    if (i == 3) {
-                        i = -1;
-                    }
-                }
-                break;
-            case "3":
-            case "7":
-            case "J":// Player3
-                for (int i = 2; i < players.size(); i++) {
-                    pA.add(players.get(i));
-                    if (i == 1) {
-                        break;
-                    }
-                    if (i == 3) {
-                        i = -1;
-                    }
-                }
-                break;
-            case "4":
-            case "8":
-            case "Q":// Player4
-                for (int i = 3; i < players.size(); i++) {
-                    pA.add(players.get(i));
-                    if (i == 2) {
-                        break;
-                    }
-                    if (i == 3) {
-                        i = -1;
-                    }
-                }
-                break;
-            default:
-                System.out.println("Error assigning lead card");
-                break;
+        HashSet<String> setPlayer1 = new HashSet<String>(Arrays.asList("A", "5", "9", "K"));
+        HashSet<String> setPlayer2 = new HashSet<String>(Arrays.asList("2", "6", "X"));
+        HashSet<String> setPlayer3 = new HashSet<String>(Arrays.asList("3", "7", "J"));
+    
+
+        
+        if (setPlayer1.contains(center.get(0).getRank())) {
+            for (int i = 0; i < players.size(); i++) {// Player1
+                pA.add(players.get(i));
+            }
         }
+        else if (setPlayer2.contains(center.get(0).getRank()))// Player2
+        {
+            for (int i = 1; i < players.size(); i++) {
+                pA.add(players.get(i));
+                if (i == 0) {
+                    break;
+                }
+                if (i == 3) {
+                    i = -1;
+                }
+            }
+        }
+        else if (setPlayer3.contains(center.get(0).getRank()))// Player3
+        {
+            for (int i = 2; i < players.size(); i++) {
+                pA.add(players.get(i));
+                if (i == 1) {
+                    break;
+                }
+                if (i == 3) {
+                    i = -1;
+                }
+            }
+        }
+        else // Player4
+        {
+            for (int i = 3; i < players.size(); i++) {
+                pA.add(players.get(i));
+                if (i == 2) {
+                    break;
+                }
+                if (i == 3) {
+                    i = -1;
+                }
+            }
+        }
+        
 
     }
 
-    public static ArrayList<Player> newPlayerAcc(ArrayList<Player> players, ArrayList<Player> playerAcc, Player highestRankPlayer) {
+    // Let winner become the first player of the next trick
+    public static ArrayList<Player> newPlayerAcc(ArrayList<Player> players, ArrayList<Player> playerAcc,
+            Player highestRankPlayer) {
         playerAcc.add(0, highestRankPlayer); // shift winner to the first index: [winner(player4), player1, player2, ..]
 
         Player currentPlayer = playerAcc.get(0); // Gets the first player
@@ -118,11 +136,129 @@ class Main {
         return newPlayersAccordance;
     }
 
+    public static int checkHandDeckAndDeck(CenterDeck center, Player player) { // return cardCheck (check if got playable card)
+        ArrayList<Card> currentHandDeck = player.getHandDeck();
+        Card centerFirstCard = center.get(0);
+        int cardCheck = 0;
+        for (Card card : currentHandDeck) {
+            if (!(card.getRank().equals(centerFirstCard.getRank()))
+                    && !(card.getSuit().equals(centerFirstCard.getSuit()))) {
+                cardCheck++;
+            }
+        }
+        return cardCheck;
+
+    }
+
+    public static void countScore(ArrayList<Player> players) {
+        for (Player player : players) {
+            ArrayList<Card> currentPlayerCards = player.getHandDeck();
+            int currentScore = player.getScore();
+            for (Card card : currentPlayerCards) {
+                String cardRank = card.getRank();
+                switch (cardRank) {
+                    case "A":
+                        currentScore++;
+                        break;
+                    case "2":
+                        currentScore += 2;
+                        break;
+                    case "3":
+                        currentScore += 3;
+                        break;
+                    case "4":
+                        currentScore += 4;
+                        break;
+                    case "5":
+                        currentScore += 5;
+                        break;
+                    case "6":
+                        currentScore += 6;
+                        break;
+                    case "7":
+                        currentScore += 7;
+                        break;
+                    case "8":
+                        currentScore += 8;
+                        break;
+                    case "9":
+                        currentScore += 9;
+                        break;
+                    case "X":
+                    case "J":
+                    case "Q":
+                    case "K":
+                        currentScore += 10;
+                        break;
+
+                    default:
+                        System.out.println("Got error in switch");
+                        break;
+                }
+                player.setScore(currentScore);
+            }
+        }
+
+    }
+
+    public static void printScore(ArrayList<Player> players) {
+        System.out.println("Player 1: " + players.get(0).getScore() + " | " + "Player 2: "
+                + players.get(1).getScore() + " | " + "Player 3: " + players.get(2).getScore() + " | "
+                + "Player 4: " + players.get(3).getScore() + " | ");
+    }
+
+    public static void printInfo(ArrayList<Player> players,Player currentPlayer, int k, boolean loadStatus, SaveData savedData, CenterDeck center, Deck deck) {
+        System.out.println("Trick" + k + "#");
+for (Player player : players) {
+                        if (player.equals(currentPlayer)) {
+                            System.out.println("--> " + player.toString());
+                        } else {
+                            System.out.println("    " + player.toString());
+                        }
+                    } // print player's deck
+
+                    System.out.println(center);
+                    System.out.println(deck.toString()); // print deckk
+                    printScore(players);
+                    System.out.println("Turn: Player" + currentPlayer.getPlayerNo());
+     }
+
     public static void main(String[] args) {
-        outerloop: while (true) { // New game
-            Deck deck = new Deck(); // new Deck is created
-            Stack<Card> center = new Stack<>(); // new center is created
+
+        gameloop: while (true) { // New game
+            SaveData savedData = new SaveData();
             Scanner input = new Scanner(System.in);
+            System.out.println("Start, load, exit: (s/l/e): ");
+            boolean loadStatus = false;
+            //while loop for gameChoice
+            gameChoice:
+            while (true){
+                String gameChoice = input.nextLine();
+                if (gameChoice.equals("e")) {
+                    System.out.println("game exited");
+                    break;
+                } else if (gameChoice.equals("l")) {
+                    while (true) {
+                        try {
+                            savedData = loadGame(input);
+                            loadStatus = true;
+                            break gameChoice;
+                        } catch (Exception e) {
+                            System.out.println("Load failed !!!!");
+                            System.out.println("File does not found! Please enter a valid file name");
+                        }
+                    }
+                    
+                } else if (gameChoice.equals("s")) {
+                    break;
+                } else {
+                    System.out.println("Invalid input, please try again");
+                }
+            }
+
+            Deck deck = new Deck(); // new Deck is created
+            CenterDeck center = new CenterDeck(); // new center is created
+
             System.out.println("Unshuffled " + deck);
             deck.shuffle(); // shuffle the deck
             ArrayList<Player> players = new ArrayList<>();
@@ -148,91 +284,184 @@ class Main {
             }
 
             // loop continues when players' deck size not equal 0
-            for (int k = 1; players.get(0).getSize() != 0 ||
+            trickloop: for (int k = 1; players.get(0).getSize() != 0 ||
                     players.get(1).getSize() != 0 ||
                     players.get(2).getSize() != 0 ||
                     players.get(3).getSize() != 0; k++) {
-                if (k > 1) {
-                    center = new Stack<>();
-                }
 
-                // new Map created
+                // new Map created to track who is the winner
                 Map<Card, Player> cardPlayer = new HashMap<>();
+                if (k > 1) {
+                    center.clearAndReset();
+                }
+                if (loadStatus == true) {
+                    k = savedData.getK();
+                    cardPlayer = savedData.getCardPlayer();
+                    center = savedData.getCenter();
+                    players = savedData.getPlayers();
+                    playersAccordance = savedData.getPlayerAccordance();
+                    deck = savedData.getDeck();
+                }
                 System.out.println();
-                System.out.println("Trick" + k + "#");
 
-                for (int i = 0; i < 4; i++) {
-                    for (Player player : players) {
-                        if (player.equals(playersAccordance.get(i))) {
-                            System.out.println("--> " + player.toString());
-                        } else {
-                            System.out.println("    " + player.toString());
-                        }
 
-                    } // print player's deck
+                playerloop: for (int i = 0; i < 4; i++) {
+                    if (loadStatus == true) {
+                        i = savedData.getI();
+                        loadStatus = false;
+                    }
+                    Player currentPlayer = playersAccordance.get(i);
 
-                    System.out.println("Center: " + center);
-                    System.out.println(deck.toString()); // print deck
-                    System.out.println("Turn: Player" + playersAccordance.get(i).getPlayerNo());
+                    // for (Player player : players) {
+                    //     if (player.equals(currentPlayer)) {
+                    //         System.out.println("--> " + player.toString());
+                    //     } else {
+                    //         System.out.println("    " + player.toString());
+                    //     }
+
+                    // } // print player's deck
+
+                    // System.out.println(center);
+                    // System.out.println(deck.toString()); // print deckk
+                    // printScore(players);
+                    // System.out.println("Turn: Player" + currentPlayer.getPlayerNo());
+                    printInfo(players, currentPlayer, k, loadStatus, savedData, center, deck);
                     Card cardToRemove = null;
                     boolean error = false;
                     String choice;
-                    do {
+                    inputloop: do {
+                        if (error == true) {
+                            System.out.println();
+                            printInfo(players, currentPlayer, k, loadStatus, savedData, center, deck);
+                            error = false;
+                        }
+                        if (i > 0 || k == 1) {
+                            int cardCheck = checkHandDeckAndDeck(center, currentPlayer); // if card check equals to
+                                                                                         // number of hand deck, means
+                                                                                         // all cards are checked and
+                                                                                         // are not playable
+                            int handDeckSize = currentPlayer.getSize();
+                            // if remaining deck is exhausted, skip this player turn
+                            if (cardCheck == handDeckSize) {
+                                if (deck.getSize() == 0) {
+                                    System.out.println("DECK IS EXHAUSTED. You dont have playable card ^^ ");
+                                    System.out.println();
+                                    pause(input);
+                                    continue playerloop;
+
+                                }
+
+                                System.out.println("You don't have a playable card. Please draw a card ^^");
+                            }
+                        }
+
                         System.out.print("> ");
                         choice = input.nextLine();
                         // if input is draw, the player takes the card on top of the deck (see the error
                         // || choice.equals("draw") at the end of the do-while loop)
                         if (choice.equals("d")) {
-                            Card drawCard = deck.drawCardTop();
-                            playersAccordance.get(i).addCard(drawCard);
-                            System.out.println("Trick" + k + "#");
-                            for (Player player : players) {
-                                System.out.println(player.toString());
-                            } // print all players deck
-                            System.out.println("Center: " + center);
-                            System.out.println(deck.toString()); // print deck
-                            System.out.println(printScore(players)); // print players score
-                            System.out.println("Turn: Player" + playersAccordance.get(i).getPlayerNo());
+                            try {
+                                Card drawCard = deck.drawCardTop();
+                                currentPlayer.addCard(drawCard);
+                                error = false;
+                            } catch (Exception e) {
+                                System.out.println("The deck is exhausted. You cannot draw the card !");
+                                pause(input);
+                                error = true;
+                            }
+                            printInfo(players, currentPlayer, k, loadStatus, savedData, center, deck);
 
                         } else if (choice.equals("s")) {
-                            System.out.println("Would you like to start a new game? (y/n)");
-                            System.out.print("choice: ");
+                            System.out.print("Would you like to start a new game?(y/n) :");
                             String startNew = input.nextLine();
-                            System.out.println();
                             if (startNew.equals("y")) {
-                                continue outerloop;
+                                System.out.print("Do yo want to save the current progress?(y/n) :");
+                                String toSave = input.nextLine();
+                                if (toSave.equals("y"))
+                                    try {
+                                        saveGame(players, playersAccordance, deck, center, k, i, cardPlayer, input);
+                                        System.out.println("Game saved successfully");
+                                        error = false;
+                                    } catch (IOException e) {
+                                        System.out.println("Failed to save");
+                                        error = true;
+                                    }
+                                continue gameloop;
                             } else {
                                 error = true;
                             }
                         } else if (choice.equals("x")) {
-                            System.out.println("Would you like to exit the game? (y/n)");
-                            System.out.print("choice: ");
+                            System.out.print("Would you like to exit the game?(y/n): ");
                             String exitGame = input.nextLine();
                             if (exitGame.equals("y")) {
-                                break outerloop;
+                                System.out.print("Do yo want to save the current progress?(y/n) :");
+                                String toSave = input.nextLine();
+                                if (toSave.equals("y"))
+                                    try {
+                                        saveGame(players, playersAccordance, deck, center, k, i, cardPlayer, input);
+                                        System.out.println("Game saved successfully");
+                                        error = false;
+                                    } catch (IOException e) {
+                                        System.out.println("Failed to save");
+                                        error = true;
+                                    }
+                                break gameloop;
                             } else {
                                 error = true;
                             }
+                        } else if (choice.equals("save")) {
+                            try {
+                                saveGame(players, playersAccordance, deck, center, k, i, cardPlayer, input);
+                                error = false;
+                                printInfo(players, currentPlayer, k, loadStatus, savedData, center, deck);
+                            } catch (IOException e) {
+                                System.out.println("Failed to save");
+                                error = true;
+                            }
+
+                        } else if (choice.equals("load")) {
+                            while (true) {
+                                try {
+                                    savedData = loadGame(input);
+                                    i = savedData.getI();
+                                    k = savedData.getK();
+                                    players = savedData.getPlayers();
+                                    playersAccordance = savedData.getPlayerAccordance();
+                                    currentPlayer = playersAccordance.get(i);
+                                    center = savedData.getCenter();
+                                    deck = savedData.getDeck();
+                                    cardPlayer = savedData.getCardPlayer();
+                                    printInfo(players, currentPlayer, k, loadStatus, savedData, center, deck);
+                                    error = false;
+                                    break;
+                                } catch (Exception e) {
+                                    System.out.println("Load failed !!!!");
+                                    System.out.println("File does not found! Please enter a valid file name");
+                                    System.out.println(e.getMessage());
+                                    error = true;
+                                }
+                            }
+
                         } else {
                             try {
-                                cardToRemove = playersAccordance.get(i).removeCard(choice); // Card to remove
+                                cardToRemove = currentPlayer.removeCard(choice); // Card to remove
                                 error = false;
                             } catch (Exception e) {
-                                System.out.println("Error: " + e.getMessage());
+                                System.out.println("Card not found in handDeck, please choose a playable card");
                                 error = true;
                             }
 
                             if (error == false) { // Check if the card matches the suit or rank of the current card
 
-                                if (center.isEmpty()) { // Check if the center is empty (trick 2 onwards so that the
-                                                        // first player's card is the lead)
+                                if (center.getCards().isEmpty()) { // Check if the center is empty (trick 2 onwards so
+                                                                   // that the first player's card is the lead) 
                                     center.push(cardToRemove);
-                                    cardPlayer.put(cardToRemove, playersAccordance.get(i));
-                                } else {
+                                    cardPlayer.put(cardToRemove, currentPlayer);
+                                } else { //when the center has lead card, check
                                     if (center.get(0).getSuit().equals(cardToRemove.getSuit())
                                             || center.get(0).getRank().equals(cardToRemove.getRank())) {
                                         center.push(cardToRemove);
-                                        cardPlayer.put(cardToRemove, playersAccordance.get(i));
+                                        cardPlayer.put(cardToRemove, currentPlayer);
                                     } else {
                                         error = true;
                                         System.out.println("Please match your suit or rank of the lead card ^^");
@@ -242,12 +471,30 @@ class Main {
                             }
                         }
 
-                    } while (error || choice.equals("d"));
+                    } while (error || choice.equals("d") || choice.equals("load") || choice.equals("save")); // end of
+                                                                                                             // input
+                                                                                                             // loop
 
-                    System.out.println(center);
-                } // for loop
+                    if (currentPlayer.getSize() == 0) { // end the round
+                        countScore(players);
+                        System.out.println("This is the final score for this round. Well Done ^^");
+                        printScore(players);
+                        System.out.println();
+                        System.out.print("Do you want to start a new game ? (y/n) : ");
+                        String newGame = input.nextLine();
+                        if (newGame.equals("y")) {
+                            System.out.println();
+                            continue gameloop;
+                        } else {
+                            break gameloop;
+                        }
+                    } // end the round
+
+                } // end of player loop
 
                 // remove diff suit
+                Stack<Card> centerCardsToPrintOnly = new Stack<Card>();
+                centerCardsToPrintOnly = center.getCards();
                 removeDiffSuit(center);
 
                 if (k == 1) { // remove the first lead card. Only for trick 1
@@ -256,7 +503,7 @@ class Main {
                 }
 
                 Player highestRankPlayer = determineWinner(center, cardPlayer);
-
+                System.out.println(centerCardsToPrintOnly);
                 System.out.println("The winner for this trick is : player" + highestRankPlayer.getPlayerNo()); // print
                                                                                                                // out
                                                                                                                // winner
@@ -268,9 +515,7 @@ class Main {
                                                                                                  // ordering of players
                                                                                                  // stored in new
                                                                                                  // players acc.
-
-            }
-            // for loop
+            } // end of trick loop
         }
     }
 }
