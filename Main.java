@@ -37,7 +37,6 @@ class Main {
         System.out.println("save        -- Save current progress");
         System.out.println("s           -- Start a new game.");
         System.out.println("x           -- Exit game.");
-
     }
     
     public static boolean pause(Scanner scanner) {
@@ -233,10 +232,10 @@ class Main {
             Boolean exitFlag = false;
             boolean loadStatus = false;
             //Print homepage (start, load and exit)
-            System.out.println("*************************");
-            System.out.println("         GO BOOM         ");
-            System.out.println("*************************");
-            System.out.println(" START     LOAD     EXIT ");
+            System.out.println("*******************************");
+            System.out.println("            GO BOOM            ");
+            System.out.println("*******************************");
+            System.out.println(" START    LOAD    HELP    EXIT ");
             System.out.println();
             System.out.print("Enter your choice: ");
             gameChoice: while(true){  //while loop for gameChoice 
@@ -259,6 +258,10 @@ class Main {
                 } else if (gameLoop.equals("start")) {
                     System.out.println();
                     break gameChoice;
+                } else if (gameLoop.equals("help")) {
+                    printHelp();
+                    pause(input);
+                    continue gameLoop;
                 } else {
                     System.out.println("Invalid input, please try again");
                 }
@@ -383,6 +386,8 @@ class Main {
                                     }
                                     System.out.println();
                                     continue gameLoop;
+                                }else {
+                                    error = true;
                                 }
                             } else if (choice.equals("x")) {
                                 System.out.print("Would you like to exit the game?(y/n): ");
@@ -401,6 +406,8 @@ class Main {
                                         }
                                     }
                                     break gameLoop;
+                                } else {
+                                    error = true;
                                 }
                             } else if (choice.equals("save")) {
                                 try {
@@ -439,6 +446,13 @@ class Main {
                             }
                             
                             else {
+                                char c = choice.charAt(1);
+                                if (Character.isAlphabetic(c)) {
+                                    c = Character.toUpperCase(c);
+                                    choice = choice.substring(0, 1) + c;
+                                }
+                                
+
                                 try {
                                     cardToRemove = currentPlayer.removeCard(choice); // Card to remove
                                     error = false;
