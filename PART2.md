@@ -2,12 +2,12 @@
 
 ## A. Member Contributions
 
-No |     ID     |     Name     | Task descriptions | Contribution %
--- | ---------- | ------------ | ----------------- | --------------
-1  | 1211102879 | KOH JIA JIE  |      1,2,3,4      |       25
-2  | 1211103236 | TANG YU XUAN |      1,2,3,4      |       25
-3  | 1211101196 | TAN HUI JEEN |      5,6,7,8      |       25
-4  | 1211100571 | TEH YVONNE   |      5,6,7,8      |       25
+No |     ID     |     Name     |    Task descriptions    | Contribution %
+-- | ---------- | ------------ | ----------------------- | --------------
+1  | 1211102879 | KOH JIA JIE  |  1,2,3,4(P1) 4,5,6(P2)  |       25
+2  | 1211103236 | TANG YU XUAN |  1,2,3,4(P1) 4,5,6(P2)  |       25
+3  | 1211101196 | TAN HUI JEEN |  5,6,7,8(P1) 1,2,3(P2)  |       25
+4  | 1211100571 | TEH YVONNE   |  5,6,7,8(P1) 1,2,3(P2)  |       25
 
 
 ## B. Part 1 Feature Completion (Latest)
